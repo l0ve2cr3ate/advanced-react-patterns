@@ -4,40 +4,43 @@
 import * as React from 'react'
 import {Switch} from '../switch'
 
-// 🐨 create your ToggleContext context here
-// 📜 https://reactjs.org/docs/context.html#reactcreatecontext
+// Exercise
+// The fundamental difference between this exercise and the last one is that now we’re 
+// going to allow people to render the compound components wherever they like in the 
+// render tree. Searching through props.children for the components to clone would be futile. 
+// So we’ll use context instead.
+
+// Your job will be to make the ToggleContext which will be used to implicitly share the state 
+// between these components, and then a custom hook to consume that context for the compound 
+// components to do their job.
+
+const ToggleContext = React.createContext()
 
 function Toggle({onToggle, children}) {
   const [on, setOn] = React.useState(false)
   const toggle = () => setOn(!on)
 
-  // 🐨 remove all this 💣 and instead return <ToggleContext.Provider> where
-  // the value is an object that has `on` and `toggle` on it.
-  return React.Children.map(children, child => {
-    return typeof child.type === 'string'
-      ? child
-      : React.cloneElement(child, {on, toggle})
-  })
+return (
+  <ToggleContext.Provider value={{on, toggle}}>
+    {children}
+  </ToggleContext.Provider>
+)
 }
 
-// 🐨 we'll still get the children from props (as it's passed to us by the
-// developers using our component), but we'll get `on` implicitly from
-// ToggleContext now
-// 🦉 You can create a helper method to retrieve the context here. Thanks to that,
-// your context won't be exposed to the user
-// 💰 `const context = useContext(ToggleContext)`
-// 📜 https://reactjs.org/docs/hooks-reference.html#usecontext
-function ToggleOn({on, children}) {
+const useToggle = () => React.useContext(ToggleContext)
+
+function ToggleOn({children}) {
+  const {on} = useToggle()
   return on ? children : null
 }
 
-// 🐨 do the same thing to this that you did to the ToggleOn component
-function ToggleOff({on, children}) {
+function ToggleOff({children}) {
+  const {on} = useToggle()
   return on ? null : children
 }
 
-// 🐨 get `on` and `toggle` from the ToggleContext with `useContext`
-function ToggleButton({on, toggle, ...props}) {
+function ToggleButton({...props}) {
+  const {on, toggle} = useToggle()
   return <Switch on={on} onClick={toggle} {...props} />
 }
 
@@ -61,3 +64,10 @@ export default App
 eslint
   no-unused-vars: "off",
 */
+
+// Extra Credit
+// 1. 💯 custom hook validation
+// Change the App function to this:
+
+// const App = () => <ToggleButton />
+// Why doesn’t that work? Can you figure out a way to give the developer a better error message?
