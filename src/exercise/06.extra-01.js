@@ -1,15 +1,42 @@
 // Control Props
-// http://localhost:3000/isolated/exercise/06.js
+// Exercise 6 Extra Credit 1
 
 import * as React from 'react'
 import warning from 'warning'
 import {Switch} from '../switch'
 
-// Exercise
-// In this exercise, we’ve created a <Toggle /> component which can accept a prop called on
-// and another called onChange. These works similar to the value and onChange props of
-// <input />. Your job is to make those props actually control the state of on and
-// call the onChange with the suggested changes.
+// Extra Credit
+// 1. 💯 add read only warning
+// Take a look at the example in ./src/examples/warnings.js (you can pull it up at
+// /isolated/examples/warnings.js).
+
+// Notice the warnings when you click the buttons. You should see the following warnings
+// all related to controlled inputs:
+// Warning: Failed prop type: You provided a `value` prop to a form field without an
+// `onChange` handler. This will render a read-only field. If the field should be
+// mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.
+// Warning: A component is changing an uncontrolled input of type undefined to be controlled.
+// Input elements should not switch from uncontrolled to controlled (or vice versa).
+// Decide between using a controlled or uncontrolled input element for the lifetime of
+// the component. More info: https://fb.me/react-controlled-components
+// Warning: A component is changing a controlled input of type undefined to be uncontrolled.
+// Input elements should not switch from controlled to uncontrolled (or vice versa).
+// Decide between using a controlled or uncontrolled input element for the lifetime of
+// the component. More info: https://fb.me/react-controlled-components
+
+// We should issue the same warnings for people who misuse our controlled props:
+
+// Passing on without onChange
+// Passing a value for on and later passing undefined or null
+// Passing undefined or null for on and later passing a value
+// For this first extra credit, create a warning for the read-only situation (the other extra credits will handle the other cases).
+
+// 💰 You can use the warning package to do this:
+// warning(doNotWarn, 'Warning message')
+
+// // so:
+// warning(false, 'This will warn')
+// warning(true, 'This will not warn')
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -52,7 +79,7 @@ function useToggle({
     warning(
       !readOnlyMessage,
       'Warning: You provided an `on` prop to useToggle hook without an `onChange` handler. This will render a read-only toggle. If the toggle should be mutable use `initialOn`. Otherwise, set either `onChange` or `readOnly`',
-     )
+    )
   }, [readOnly, hasOnChange, onIsControlled])
 
   const dispatchWithOnChange = action => {
@@ -149,8 +176,3 @@ export {Toggle}
 eslint
   no-unused-vars: "off",
 */
-
-// 2. 💯 add a controlled state warning
-// With that read-only warning in place, next try and add a warning for when 
-// the user changes from controlled to uncontrolled or vice-versa.
-// (Passing a value for on and later passing undefined or null)

@@ -1,8 +1,25 @@
 // State Reducer
-// http://localhost:3000/isolated/exercise/05.js
+// Exercise 5 Extra Credit 1
 
 import * as React from 'react'
 import {Switch} from '../switch'
+
+// Extra Credit
+// 1. 💯 default state reducer
+// Our toggleReducer is pretty simple, so it’s not a huge pain for people to implement their
+// own. However, in a more realistic scenario, people may struggle with having to basically
+// re-implement our entire reducer which could be pretty complex. So see if you can provide
+// a nice way for people to be able to use the toggleReducer themselves if they so choose.
+// Feel free to test this out by changing the toggleStateReducer function inside the <App />
+// example to use the default reducer instead of having to re-implement what to do when
+// the action type is 'reset':
+
+// function toggleStateReducer(state, action) {
+//   if (action.type === 'toggle' && timesClicked >= 4) {
+//     return {on: state.on}
+//   }
+//   return toggleReducer(state, action)
+// }
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -57,20 +74,10 @@ function App() {
   const clickedTooMuch = timesClicked >= 4
 
   function toggleStateReducer(state, action) {
-    switch (action.type) {
-      case 'toggle': {
-        if (clickedTooMuch) {
-          return {on: state.on}
-        }
-        return {on: !state.on}
-      }
-      case 'reset': {
-        return {on: false}
-      }
-      default: {
-        throw new Error(`Unsupported type: ${action.type}`)
-      }
+    if (action.type === 'toggle' && timesClicked >= 4) {
+      return {on: state.on}
     }
+    return toggleReducer(state, action)
   }
 
   const {on, getTogglerProps, getResetterProps} = useToggle({
@@ -102,10 +109,3 @@ function App() {
 }
 
 export default App
-
-/*
-eslint
-  no-unused-vars: "off",
-*/
-
-

@@ -1,15 +1,14 @@
 // Control Props
-// http://localhost:3000/isolated/exercise/06.js
+// Exercise 6 Extra Credit 2
 
 import * as React from 'react'
 import warning from 'warning'
 import {Switch} from '../switch'
 
-// Exercise
-// In this exercise, we’ve created a <Toggle /> component which can accept a prop called on
-// and another called onChange. These works similar to the value and onChange props of
-// <input />. Your job is to make those props actually control the state of on and
-// call the onChange with the suggested changes.
+// 2. 💯 add a controlled state warning
+// With that read-only warning in place, next try and add a warning for when
+// the user changes from controlled to uncontrolled or vice-versa.
+// (Passing a value for on and later passing undefined or null)
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -46,13 +45,25 @@ function useToggle({
   const on = onIsControlled ? controlledOn : state.on
 
   const hasOnChange = !!onChange
+  const {current: controlledOnRef} = React.useRef(onIsControlled)
+
+  React.useEffect(() => {
+    warning(
+      !(!controlledOnRef && onIsControlled),
+      '`useToggle` is changing from uncontrolled to controlled. This is likely caused by the value changing from defined to an undefined value, which should not happen. Decide between using a controlled or uncontrolled element for the lifetime of the component.',
+    )
+    warning(
+      !(controlledOnRef && !onIsControlled),
+      '`useToggle` is changing an controlled component to be uncontrolled. This is likely caused by the value changing from defined to a undefined value, which should not happen. Decide between using a controlled or uncontrolled element for the lifetime of the component.',
+    )
+  }, [controlledOnRef, onIsControlled])
 
   React.useEffect(() => {
     const readOnlyMessage = !hasOnChange && onIsControlled && !readOnly
     warning(
       !readOnlyMessage,
       'Warning: You provided an `on` prop to useToggle hook without an `onChange` handler. This will render a read-only toggle. If the toggle should be mutable use `initialOn`. Otherwise, set either `onChange` or `readOnly`',
-     )
+    )
   }, [readOnly, hasOnChange, onIsControlled])
 
   const dispatchWithOnChange = action => {
@@ -116,7 +127,7 @@ function App() {
   return (
     <div>
       <div>
-        <Toggle on={bothOn} onChange={handleToggleChange} />
+        <Toggle on={undefined} onChange={handleToggleChange} />
         <Toggle on={bothOn} onChange={handleToggleChange} />
       </div>
       {timesClicked > 4 ? (
@@ -149,8 +160,3 @@ export {Toggle}
 eslint
   no-unused-vars: "off",
 */
-
-// 2. 💯 add a controlled state warning
-// With that read-only warning in place, next try and add a warning for when 
-// the user changes from controlled to uncontrolled or vice-versa.
-// (Passing a value for on and later passing undefined or null)

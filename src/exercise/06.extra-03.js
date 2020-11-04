@@ -1,15 +1,13 @@
 // Control Props
-// http://localhost:3000/isolated/exercise/06.js
+// Exercise 6 Extra Credit 3
 
 import * as React from 'react'
 import warning from 'warning'
 import {Switch} from '../switch'
 
-// Exercise
-// In this exercise, we’ve created a <Toggle /> component which can accept a prop called on
-// and another called onChange. These works similar to the value and onChange props of
-// <input />. Your job is to make those props actually control the state of on and
-// call the onChange with the suggested changes.
+// 3. 💯 extract warnings to a custom hook
+// Both of those warnings could be useful anywhere so let’s go ahead and make a custom hook
+// for them.
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -47,13 +45,18 @@ function useToggle({
 
   const hasOnChange = !!onChange
 
-  React.useEffect(() => {
-    const readOnlyMessage = !hasOnChange && onIsControlled && !readOnly
-    warning(
-      !readOnlyMessage,
-      'Warning: You provided an `on` prop to useToggle hook without an `onChange` handler. This will render a read-only toggle. If the toggle should be mutable use `initialOn`. Otherwise, set either `onChange` or `readOnly`',
-     )
-  }, [readOnly, hasOnChange, onIsControlled])
+  useControlledSwitchWarning(controlledOn, 'on', 'useToggle')
+
+  useOnChangeReadOnlyWarning(
+    hasOnChange,
+    readOnly,
+    controlledOn,
+    'on',
+    'useToggle',
+    'onChange',
+    'readOnly',
+    'initialOn',
+  )
 
   const dispatchWithOnChange = action => {
     if (!onIsControlled) {
@@ -150,7 +153,53 @@ eslint
   no-unused-vars: "off",
 */
 
-// 2. 💯 add a controlled state warning
-// With that read-only warning in place, next try and add a warning for when 
-// the user changes from controlled to uncontrolled or vice-versa.
-// (Passing a value for on and later passing undefined or null)
+const useControlledSwitchWarning = (
+  controlPropValue,
+  controlPropName,
+  componentName,
+) => {
+  const isControlled = controlPropValue != null
+  let {current: wasControlled} = React.useRef(isControlled)
+
+  React.useEffect(() => {
+    warning(
+      !(!isControlled && wasControlled),
+      `${componentName} is changing from uncontrolled to controlled. Decide between using a controlled or uncontrolled element for the lifetime of the component. Check the \`${controlPropName}\` prop.`,
+    )
+    warning(
+      !(isControlled && !wasControlled),
+      `${componentName} is changing an controlled component to be uncontrolled. Decide between using a controlled or uncontrolled element for the lifetime of the component. Check the \`${controlPropName}\` prop.`,
+    )
+  }, [componentName, controlPropName, isControlled, wasControlled])
+}
+
+const useOnChangeReadOnlyWarning = (
+  hasOnChange,
+  readOnly,
+  controlPropValue,
+  controlPropName,
+  componentName,
+  onChangeProp,
+  readOnlyProp,
+  initialValueProp,
+) => {
+  const isControlled = controlPropValue != null
+
+  React.useEffect(() => {
+    const readOnlyMessage = !hasOnChange && isControlled && !readOnly
+    warning(
+      !readOnlyMessage,
+      `Warning: You provided an ${controlPropName} prop to ${componentName} without an ${onChangeProp} handler. This will render a read-only ${componentName}. If the toggle should be mutable use ${initialValueProp}. Otherwise, set either ${onChangeProp} or ${readOnlyProp}`,
+    )
+  }, [
+    readOnly,
+    hasOnChange,
+    isControlled,
+    controlPropValue,
+    controlPropName,
+    componentName,
+    initialValueProp,
+    onChangeProp,
+    readOnlyProp,
+  ])
+}
